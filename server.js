@@ -4,6 +4,7 @@ const path = require('path');
 const cors = require('cors');
 const morgan = require('morgan');
 const dotenv = require('dotenv');
+const fs = require('fs');
 
 // Load environment variables
 dotenv.config();
@@ -25,53 +26,32 @@ app.use(fileUpload({
   tempFileDir: '/tmp/'
 }));
 
+// Debugging - log current directory and files
+console.log('Current directory:', __dirname);
+console.log('Files in current directory:', fs.readdirSync(__dirname).join(', '));
+
 // Routes
 app.use('/api', require('./routes/api'));
 
-// Serve static files from React build in production
+// Serve static files
 if (process.env.NODE_ENV === 'production') {
-  const fs = require('fs');
+  // First try to serve the index.html in the root
+  app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+  });
   
-  // Define all possible paths where build files might be
-  const possiblePaths = [
-    path.join(__dirname, './client/build'),
-    path.join(__dirname, 'client/build'),
-    path.join(__dirname, '../client/build'),
-    path.join(__dirname, 'build'),
-    '/opt/render/project/src/client/build'
-  ];
-  
-  console.log('Current directory:', __dirname);
-  console.log('Looking for build directory in:');
-  
-  // Find the first valid path
-  let validPath = null;
-  for (const testPath of possiblePaths) {
-    console.log(` - ${testPath}: ${fs.existsSync(testPath) ? 'EXISTS' : 'NOT FOUND'}`);
-    if (fs.existsSync(testPath)) {
-      validPath = testPath;
-      break;
-    }
-  }
-  
-  if (validPath) {
-    console.log(`Found build directory at: ${validPath}`);
-    app.use(express.static(validPath));
-    
-    app.get('*', (req, res) => {
-      const indexPath = path.join(validPath, 'index.html');
-      if (fs.existsSync(indexPath)) {
-        res.sendFile(indexPath);
-      } else {
-        res.status(404).send('index.html not found');
-      }
-    });
+  // Try to serve from client/build if it exists
+  if (fs.existsSync(path.join(__dirname, 'client/build'))) {
+    console.log('client/build directory found, serving static files');
+    app.use(express.static(path.join(__dirname, 'client/build')));
   } else {
-    console.error('Could not find client build directory');
-    app.get('*', (req, res) => {
-      res.status(404).send('Build directory not found. The app may not be properly built.');
-    });
+    console.log('client/build directory not found');
   }
+} else {
+  // In development, we serve the index.html in the root
+  app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+  });
 }
 
 // Define port
