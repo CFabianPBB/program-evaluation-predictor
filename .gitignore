@@ -7,10 +7,6 @@
 # testing
 /coverage
 
-# production
-/build
-/client/build
-
 # environment variables
 .env
 .env.local
