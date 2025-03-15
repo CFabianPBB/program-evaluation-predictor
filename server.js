@@ -4,7 +4,6 @@ const path = require('path');
 const cors = require('cors');
 const morgan = require('morgan');
 const dotenv = require('dotenv');
-const fs = require('fs');
 
 // Load environment variables
 dotenv.config();
@@ -26,36 +25,20 @@ app.use(fileUpload({
   tempFileDir: '/tmp/'
 }));
 
-// Debugging - log current directory and files
-console.log('Current directory:', __dirname);
-console.log('Files in current directory:', fs.readdirSync(__dirname).join(', '));
-
 // Routes
 app.use('/api', require('./routes/api'));
 
-// Serve static files
+// Serve static files from React build in production
 if (process.env.NODE_ENV === 'production') {
-  // First try to serve the index.html in the root
-  app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-  });
+  app.use(express.static(path.join(__dirname, 'client/build')));
   
-  // Try to serve from client/build if it exists
-  if (fs.existsSync(path.join(__dirname, 'client/build'))) {
-    console.log('client/build directory found, serving static files');
-    app.use(express.static(path.join(__dirname, 'client/build')));
-  } else {
-    console.log('client/build directory not found');
-  }
-} else {
-  // In development, we serve the index.html in the root
-  app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
   });
 }
 
 // Define port
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5002;
 
 // Start server
 app.listen(PORT, () => {
