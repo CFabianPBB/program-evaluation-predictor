@@ -2,17 +2,20 @@
 # Exit on error
 set -o errexit
 
-# Install dependencies for the server
+# List directories to understand the structure
+echo "Listing directories in current folder:"
+ls -la
+
+# Install server dependencies
 npm install
 
-# Navigate to client directory
-cd client
-
-# Install dependencies for the client
-npm install
-
-# Run the React build directly using react-scripts
-npx react-scripts build
-
-# Return to root directory
-cd ..
+# If there's no client directory, we'll skip the client build
+if [ -d "./client" ]; then
+  echo "Client directory found, building client..."
+  cd client
+  npm install
+  npm run build
+  cd ..
+else
+  echo "No client directory found, skipping client build"
+fi
