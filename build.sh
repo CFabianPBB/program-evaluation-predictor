@@ -2,17 +2,17 @@
 # Exit on error
 set -o errexit
 
-# Install dependencies
+# Install dependencies for the server
 npm install
 
-# Go to client directory
+# Navigate to client directory
 cd client
 
-# Install client dependencies
+# Install dependencies for the client
 npm install
 
-# Build the client
-npm run build
+# Run the React build directly using react-scripts
+npx react-scripts build
 
 # Return to root directory
 cd ..
