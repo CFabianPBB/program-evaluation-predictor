@@ -30,15 +30,17 @@ app.use('/api', require('./routes/api'));
 
 // Serve static files from React build in production
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, 'client/build')));
+  // Set static folder
+  app.use(express.static('client/build'));
   
+  // For any route that's not an API route, serve the React app
   app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
+    res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
   });
 }
 
 // Define port
-const PORT = process.env.PORT || 5002;
+const PORT = process.env.PORT || 5001;
 
 // Start server
 app.listen(PORT, () => {
