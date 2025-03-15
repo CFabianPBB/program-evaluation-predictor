@@ -30,8 +30,8 @@ app.use('/api', require('./routes/api'));
 
 // Serve static files from React build in production
 if (process.env.NODE_ENV === 'production') {
-  // Set static folder
-  app.use(express.static('client/build'));
+  // Set static folder with more explicit path
+  app.use(express.static(path.join(__dirname, 'client/build')));
   
   // For any route that's not an API route, serve the React app
   app.get('*', (req, res) => {
