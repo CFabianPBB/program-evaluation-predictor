@@ -53,13 +53,24 @@ router.post('/analyze', async (req, res) => {
     // Process the data
     const analysisResults = await analyzePrograms(programsData, websiteUrl, threshold);
     
-    // SANITIZE DATA: Ensure totalCost is never undefined
-    const sanitizedResults = analysisResults.map(program => ({
-      ...program,
-      totalCost: program.totalCost !== undefined ? program.totalCost : 0
-    }));
+    // SANITIZE DATA: Ensure all required properties exist and are properly named
+    const sanitizedResults = analysisResults.map(program => {
+      // Create a comprehensive sanitized object that handles various property name formats
+      return {
+        ...program,
+        department: program.department || program.Department || '',
+        program: program.program || program.Program || '',
+        totalCost: program.totalCost !== undefined ? program.totalCost : 
+                  (program[' Total Cost '] !== undefined ? program[' Total Cost '] : 
+                  (program.Total_Cost !== undefined ? program.Total_Cost : 0)),
+        cost: program.cost || program.Cost || 'L',
+        impact: program.impact || program.Impact || 'L',
+        mandate: program.mandate || program.Mandate || 'L',
+        reliance: program.reliance || program.Reliance || 'L'
+      };
+    });
     
-    // Create a new workbook with the analysis results
+    // Create a new workbook with the sanitized results
     const newWorkbook = XLSX.utils.book_new();
     const newWorksheet = XLSX.utils.json_to_sheet(sanitizedResults);
     XLSX.utils.book_append_sheet(newWorkbook, newWorksheet, 'Sheet1');
