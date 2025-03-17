@@ -87,11 +87,15 @@ router.post('/analyze', async (req, res) => {
     fs.unlinkSync(tempFilePath);
     fs.unlinkSync(resultFilePath);
     
+    // Log data types to help with debugging
+    console.log('Base64File type:', typeof base64File);
+    console.log('Base64File length:', base64File.length);
+    
     // Send the sanitized results
     res.json({
       message: 'Analysis completed successfully',
       results: sanitizedResults,
-      resultFile: base64File
+      resultFile: base64File  // Ensure this is just the base64 string
     });
   } catch (error) {
     console.error('Error in /api/analyze:', error);
