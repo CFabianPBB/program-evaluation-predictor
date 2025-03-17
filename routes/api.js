@@ -95,7 +95,10 @@ router.post('/analyze', async (req, res) => {
     res.json({
       message: 'Analysis completed successfully',
       results: sanitizedResults,
-      resultFile: base64File  // Ensure this is just the base64 string
+      resultFile: {
+        data: base64File,
+        filename: 'program_analysis_results.xlsx'
+      }
     });
   } catch (error) {
     console.error('Error in /api/analyze:', error);
