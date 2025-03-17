@@ -25,6 +25,34 @@ app.use(fileUpload({
   tempFileDir: '/tmp/'
 }));
 
+// Add response sanitization middleware
+app.use((req, res, next) => {
+  // Store the original json method
+  const originalJson = res.json;
+  
+  // Override the json method
+  res.json = function(data) {
+    // If data contains results array, sanitize it
+    if (data && data.results && Array.isArray(data.results)) {
+      data.results = data.results.map(program => {
+        if (program) {
+          // Ensure Total Cost is never undefined
+          return {
+            ...program,
+            ' Total Cost ': program[' Total Cost '] !== undefined ? program[' Total Cost '] : 0
+          };
+        }
+        return program;
+      });
+    }
+    
+    // Call the original json method with sanitized data
+    return originalJson.call(this, data);
+  };
+  
+  next();
+});
+
 // Routes
 app.use('/api', require('./routes/api'));
 
